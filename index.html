@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secur Sécurité | نظام إدارة الموظفين</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0B1B2E;
+    --steel:#16324F;
+    --steel-light:#274a6d;
+    --gold:#C9A227;
+    --gold-light:#E4C55E;
+    --cream:#F6F4EF;
+    --ink:#14202B;
+    --muted:#5B6B7A;
+    --ok:#3F7D58;
+    --danger:#B3261E;
+    --leave:#8A6D3B;
+  }
+  *{font-family:'Cairo',sans-serif;}
+  .font-display{font-family:'Tajawal',sans-serif;}
+  body{background:var(--cream); color:var(--ink);}
+  .bg-navy{background:var(--navy);}
+  .bg-steel{background:var(--steel);}
+  .text-gold{color:var(--gold);}
+  .bg-gold{background:var(--gold);}
+  .border-gold{border-color:var(--gold);}
+
+  /* Shield / badge signature element */
+  .shield{
+    width:44px;height:50px;
+    background:linear-gradient(160deg, var(--gold-light), var(--gold));
+    clip-path:polygon(50% 0%, 100% 20%, 100% 60%, 50% 100%, 0% 60%, 0% 20%);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 8px rgba(201,162,39,.4);
+    flex-shrink:0;
+  }
+  .shield span{color:var(--navy);font-weight:900;font-size:18px;font-family:'Tajawal',sans-serif;}
+
+  .nav-item{
+    display:flex;align-items:center;gap:10px;
+    padding:12px 16px;border-radius:10px;color:#c9d3dc;
+    cursor:pointer;transition:.15s;border-right:3px solid transparent;
+    font-weight:600;font-size:14.5px;
+  }
+  .nav-item:hover{background:rgba(255,255,255,.06); color:#fff;}
+  .nav-item.active{background:rgba(201,162,39,.12); color:var(--gold-light); border-right-color:var(--gold);}
+
+  .card{
+    background:#fff;border-radius:16px;
+    box-shadow:0 1px 3px rgba(11,27,46,.08), 0 8px 24px -12px rgba(11,27,46,.12);
+    border:1px solid #eae6da;
+  }
+
+  .stat-card{position:relative;overflow:hidden;}
+  .stat-card::before{
+    content:"";position:absolute;inset-inline-end:-20px;top:-20px;
+    width:90px;height:90px;border-radius:50%;
+    background:radial-gradient(circle, rgba(201,162,39,.15), transparent 70%);
+  }
+
+  table.data-table{width:100%;border-collapse:collapse;}
+  table.data-table th{
+    background:var(--navy);color:var(--gold-light);
+    font-family:'Tajawal',sans-serif;font-weight:700;font-size:13.5px;
+    padding:12px 14px;text-align:right;position:sticky;top:0;
+  }
+  table.data-table td{padding:11px 14px;border-bottom:1px solid #eee;font-size:14px;}
+  table.data-table tbody tr:hover{background:#faf8f3;}
+
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:12.5px;font-weight:700;}
+  .badge-ok{background:#e7f3ec;color:var(--ok);}
+  .badge-danger{background:#fbeae8;color:var(--danger);}
+  .badge-leave{background:#f6efe1;color:var(--leave);}
+  .badge-idle{background:#eef1f4;color:var(--muted);}
+
+  .btn-gold{background:var(--gold);color:var(--navy);font-weight:800;transition:.15s;}
+  .btn-gold:hover{background:var(--gold-light); transform:translateY(-1px);}
+  .btn-navy{background:var(--navy);color:#fff;font-weight:700;transition:.15s;}
+  .btn-navy:hover{background:var(--steel-light);}
+  .btn-outline{border:1.5px solid #d9d2bf;color:var(--ink);font-weight:600;}
+  .btn-outline:hover{border-color:var(--gold);background:#fdfaf2;}
+
+  input, select{
+    border:1.5px solid #e2ddcf;border-radius:10px;padding:9px 12px;
+    font-size:14px;width:100%;background:#fff;transition:.15s;
+  }
+  input:focus, select:focus{outline:none;border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,162,39,.15);}
+  label{font-size:13px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px;}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(11,27,46,.55);backdrop-filter:blur(2px);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;}
+
+  .att-btn{padding:8px 6px;border-radius:9px;font-size:12.5px;font-weight:700;border:1.5px solid transparent;cursor:pointer;transition:.12s;flex:1;text-align:center;}
+  .att-btn.sel-present{background:var(--ok);color:#fff;border-color:var(--ok);}
+  .att-btn.sel-absent{background:var(--danger);color:#fff;border-color:var(--danger);}
+  .att-btn.sel-leave{background:var(--leave);color:#fff;border-color:var(--leave);}
+  .att-btn.unsel{background:#fff;color:var(--muted);border-color:#e2ddcf;}
+  .att-btn.unsel:hover{border-color:var(--gold);}
+
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:#d9d2bf;border-radius:10px;}
+
+  .fade-in{animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .empty-state{border:2px dashed #e2ddcf;border-radius:16px;padding:40px 20px;text-align:center;color:var(--muted);}
+
+  @media (max-width:768px){
+    .sidebar{position:fixed; z-index:40; height:100%; transition:.2s;}
+    .sidebar.closed{transform:translateX(105%);}
+  }
+</style>
+</head>
+<body class="min-h-screen">
+
+<div id="root" class="flex min-h-screen">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="sidebar bg-navy w-64 flex-shrink-0 flex flex-col py-6 px-4">
+    <div class="flex items-center gap-3 px-2 mb-8">
+      <div class="shield"><span>S</span></div>
+      <div>
+        <div class="font-display font-black text-white text-lg leading-tight">Secur Sécurité</div>
+        <div class="text-[11px] text-gold-light tracking-wide" style="color:var(--gold-light)">نظام إدارة الموظفين</div>
+      </div>
+    </div>
+    <nav class="flex flex-col gap-1.5" id="navMenu"></nav>
+    <div class="mt-auto px-2 pt-6 border-t border-white/10">
+      <div class="text-[11px] text-center" style="color:#7f8fa0">جميع البيانات محفوظة تلقائيًا</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 flex flex-col min-w-0">
+    <header class="bg-white border-b border-[#eae6da] px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg border border-[#e2ddcf]">☰</button>
+        <h1 id="pageTitle" class="font-display font-bold text-xl" style="color:var(--navy)"></h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <div id="loadStatus" class="text-xs" style="color:var(--muted)"></div>
+      </div>
+    </header>
+    <div id="pageContent" class="p-5 md:p-7 flex-1"></div>
+  </main>
+
+</div>
+
+<script>
+/* ===================== إعداد عام ===================== */
+const PROFESSIONS = ["حارس أمن نهاري","حارس أمن ليلي","مشرف أمن","عون استقبال","مسؤول مراقبة الكاميرات","سائق مرافق أمني","منسق عمليات"];
+const PAGES = [
+  {id:"dashboard", label:"لوحة التحكم", icon:"🛡️"},
+  {id:"employees", label:"الموظفون", icon:"👤"},
+  {id:"attendance", label:"الحضور والغياب", icon:"🗓️"},
+  {id:"salaries", label:"الأجور", icon:"💰"},
+];
+
+let state = { employees: [], attendance: {} }; // attendance: { "empId|YYYY-MM-DD": "present"|"absent"|"leave" }
+let currentPage = "dashboard";
+let selectedAttDate = todayStr();
+let selectedSalaryMonth = todayStr().slice(0,7); // YYYY-MM
+let editingEmployee = null;
+
+function todayStr(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function uid(){ return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function setStatus(msg){ document.getElementById('loadStatus').textContent = msg; }
+
+/* ===================== تخزين البيانات (عبر API الخادم) ===================== */
+async function loadData(){
+  setStatus('جاري التحميل...');
+  try{
+    const [empRes, attRes] = await Promise.all([
+      fetch('/api/employees'),
+      fetch('/api/attendance')
+    ]);
+    if(!empRes.ok || !attRes.ok) throw new Error('فشل الاتصال بالخادم');
+    const emps = await empRes.json();
+    const atts = await attRes.json();
+    state.employees = emps.map(e => ({
+      id: e._id, name: e.name, profession: e.profession,
+      phone: e.phone, baseSalary: e.baseSalary, hireDate: e.hireDate
+    }));
+    state.attendance = {};
+    atts.forEach(a => { state.attendance[a.employeeId+'|'+a.date] = a.status; });
+    setStatus('');
+    document.getElementById('loadStatus').innerHTML = `<span style="color:var(--ok)">● متصل</span>`;
+  }catch(e){
+    console.error(e);
+    document.getElementById('loadStatus').innerHTML = `<span style="color:var(--danger)">● غير متصل بالخادم — تحقق من الإنترنت</span>`;
+  }
+}
+
+async function apiCreateEmployee(payload){
+  const res = await fetch('/api/employees', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+  if(!res.ok) throw new Error('فشل إنشاء الموظف');
+  return res.json();
+}
+async function apiUpdateEmployee(id, payload){
+  const res = await fetch('/api/employees/'+id, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+  if(!res.ok) throw new Error('فشل تعديل الموظف');
+  return res.json();
+}
+async function apiDeleteEmployee(id){
+  const res = await fetch('/api/employees/'+id, {method:'DELETE'});
+  if(!res.ok) throw new Error('فشل حذف الموظف');
+  return res.json();
+}
+async function apiSetAttendance(employeeId, date, status){
+  const res = await fetch('/api/attendance', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({employeeId, date, status})});
+  if(!res.ok) throw new Error('فشل حفظ الحضور');
+  return res.json();
+}
+let saveBannerTimeout;
+let lastRetryFn = null;
+function retryLastSave(){ if(lastRetryFn) lastRetryFn(); }
+function showSaveBanner(status, retryFn){
+  const el = document.getElementById('loadStatus');
+  clearTimeout(saveBannerTimeout);
+  if(status==='saving'){
+    el.innerHTML = `<span style="color:var(--muted)">⏳ جاري الحفظ...</span>`;
+  } else if(status==='ok'){
+    el.innerHTML = `<span style="color:var(--ok)">✓ تم الحفظ</span>`;
+    saveBannerTimeout = setTimeout(()=>{ el.innerHTML=''; }, 2000);
+  } else if(status==='error'){
+    lastRetryFn = retryFn;
+    el.innerHTML = `<span style="color:var(--danger)">⚠ فشل الحفظ — البيانات ظاهرة عندك لكن غير محفوظة على الخادم</span>
+      <button onclick="retryLastSave()" class="btn-outline px-2 py-1 rounded-lg text-xs" style="margin-inline-start:8px">إعادة المحاولة</button>`;
+  }
+}
+
+/* ===================== التنقل ===================== */
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('closed'); }
+
+function renderNav(){
+  const nav = document.getElementById('navMenu');
+  nav.innerHTML = PAGES.map(p => `
+    <div class="nav-item ${currentPage===p.id?'active':''}" onclick="goTo('${p.id}')">
+      <span>${p.icon}</span><span>${p.label}</span>
+    </div>`).join('');
+}
+function goTo(page){
+  currentPage = page;
+  renderNav();
+  render();
+  if(window.innerWidth < 768) document.getElementById('sidebar').classList.add('closed');
+}
+
+/* ===================== عرض الصفحات ===================== */
+function render(){
+  const titleMap = Object.fromEntries(PAGES.map(p=>[p.id,p.label]));
+  document.getElementById('pageTitle').textContent = titleMap[currentPage];
+  const el = document.getElementById('pageContent');
+  el.className = "p-5 md:p-7 flex-1 fade-in";
+  if(currentPage==='dashboard') el.innerHTML = renderDashboard();
+  if(currentPage==='employees') el.innerHTML = renderEmployees();
+  if(currentPage==='attendance') el.innerHTML = renderAttendance();
+  if(currentPage==='salaries') el.innerHTML = renderSalaries();
+}
+
+/* ---------- لوحة التحكم ---------- */
+function renderDashboard(){
+  const total = state.employees.length;
+  const today = todayStr();
+  let present=0, absent=0, leave=0;
+  state.employees.forEach(emp=>{
+    const st = state.attendance[emp.id+'|'+today];
+    if(st==='present') present++;
+    else if(st==='absent') absent++;
+    else if(st==='leave') leave++;
+  });
+  const notMarked = total - present - absent - leave;
+  const totalPayroll = state.employees.reduce((s,e)=>s+Number(e.baseSalary||0),0);
+
+  const cards = [
+    {label:'إجمالي الموظفين', value: total, color:'var(--navy)', icon:'👥'},
+    {label:'حاضر اليوم', value: present, color:'var(--ok)', icon:'✅'},
+    {label:'غائب اليوم', value: absent, color:'var(--danger)', icon:'⛔'},
+    {label:'الكتلة الأجرية الشهرية (تقديري)', value: totalPayroll.toLocaleString('ar-DZ')+' دج', color:'var(--gold)', icon:'💰', wide:true},
+  ];
+
+  return `
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
+    ${cards.map(c=>`
+      <div class="card stat-card p-5 ${c.wide?'lg:col-span-1':''}">
+        <div class="text-2xl mb-2">${c.icon}</div>
+        <div class="text-2xl font-display font-black" style="color:${c.color}">${c.value}</div>
+        <div class="text-sm mt-1" style="color:var(--muted)">${c.label}</div>
+      </div>`).join('')}
+  </div>
+
+  <div class="card p-5">
+    <h3 class="font-display font-bold text-base mb-4" style="color:var(--navy)">حالة الحضور اليوم — ${formatDateAr(today)}</h3>
+    ${total===0 ? emptyState('لا يوجد موظفون بعد', 'أضف موظفين من صفحة "الموظفون" للبدء') : `
+    <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th>الموظف</th><th>المهنة</th><th>الحالة اليوم</th></tr></thead>
+      <tbody>
+        ${state.employees.map(e=>{
+          const st = state.attendance[e.id+'|'+today];
+          return `<tr><td class="font-semibold">${esc(e.name)}</td><td>${esc(e.profession)}</td><td>${attBadge(st)}</td></tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    </div>`}
+  </div>`;
+}
+
+function attBadge(st){
+  if(st==='present') return `<span class="badge badge-ok">حاضر</span>`;
+  if(st==='absent') return `<span class="badge badge-danger">غائب</span>`;
+  if(st==='leave') return `<span class="badge badge-leave">إجازة</span>`;
+  return `<span class="badge badge-idle">لم يُسجَّل</span>`;
+}
+
+function emptyState(title, sub){
+  return `<div class="empty-state"><div class="text-3xl mb-2">🗂️</div><div class="font-bold" style="color:var(--ink)">${title}</div><div class="text-sm mt-1">${sub}</div></div>`;
+}
+
+/* ---------- الموظفون ---------- */
+function renderEmployees(){
+  const rows = state.employees.map(e=>`
+    <tr>
+      <td class="font-semibold">${esc(e.name)}</td>
+      <td>${esc(e.profession)}</td>
+      <td>${esc(e.phone||'—')}</td>
+      <td>${Number(e.baseSalary||0).toLocaleString('ar-DZ')} دج</td>
+      <td>${e.hireDate? formatDateAr(e.hireDate) : '—'}</td>
+      <td>
+        <div class="flex gap-2">
+          <button onclick="openEmployeeModal('${e.id}')" class="btn-outline px-3 py-1.5 rounded-lg text-xs">تعديل</button>
+          <button onclick="deleteEmployee('${e.id}')" class="px-3 py-1.5 rounded-lg text-xs font-bold" style="background:#fbeae8;color:var(--danger)">حذف</button>
+        </div>
+      </td>
+    </tr>`).join('');
+
+  return `
+  <div class="flex items-center justify-between mb-5">
+    <div class="text-sm" style="color:var(--muted)">${state.employees.length} موظف مسجّل</div>
+    <button onclick="openEmployeeModal()" class="btn-gold px-4 py-2.5 rounded-xl text-sm">+ إضافة موظف</button>
+  </div>
+  <div class="card overflow-hidden">
+    ${state.employees.length===0 ? `<div class="p-6">${emptyState('لا يوجد موظفون بعد','اضغط على "إضافة موظف" لتسجيل أول موظف')}</div>` : `
+    <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th>الاسم الكامل</th><th>المهنة</th><th>الهاتف</th><th>الأجر الأساسي / شهر</th><th>تاريخ التوظيف</th><th>إجراءات</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    </div>`}
+  </div>
+  <div id="modalHost"></div>`;
+}
+
+function openEmployeeModal(id){
+  editingEmployee = id ? state.employees.find(e=>e.id===id) : null;
+  const e = editingEmployee || {name:'',profession:PROFESSIONS[0],phone:'',baseSalary:'',hireDate:todayStr()};
+  const host = document.getElementById('modalHost');
+  host.innerHTML = `
+  <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="card w-full max-w-md p-6" onclick="event.stopPropagation()">
+      <h3 class="font-display font-bold text-lg mb-5" style="color:var(--navy)">${editingEmployee?'تعديل بيانات الموظف':'إضافة موظف جديد'}</h3>
+      <div class="flex flex-col gap-4">
+        <div><label>الاسم الكامل</label><input id="f_name" value="${esc(e.name)}" placeholder="مثال: أحمد بلقاسم"></div>
+        <div><label>المهنة</label>
+          <select id="f_profession">
+            ${PROFESSIONS.map(p=>`<option value="${p}" ${e.profession===p?'selected':''}>${p}</option>`).join('')}
+          </select>
+        </div>
+        <div><label>رقم الهاتف</label><input id="f_phone" value="${esc(e.phone||'')}" placeholder="0555 xx xx xx"></div>
+        <div><label>الأجر الأساسي الشهري (دج)</label><input id="f_salary" type="number" min="0" value="${e.baseSalary||''}" placeholder="45000"></div>
+        <div><label>تاريخ التوظيف</label><input id="f_hire" type="date" value="${e.hireDate||todayStr()}"></div>
+      </div>
+      <div class="flex gap-3 mt-6">
+        <button onclick="saveEmployee()" class="btn-gold flex-1 py-2.5 rounded-xl text-sm">حفظ</button>
+        <button onclick="closeModal()" class="btn-outline flex-1 py-2.5 rounded-xl text-sm">إلغاء</button>
+      </div>
+    </div>
+  </div>`;
+}
+function closeModal(){ document.getElementById('modalHost').innerHTML=''; editingEmployee=null; }
+
+async function saveEmployee(){
+  const name = document.getElementById('f_name').value.trim();
+  const profession = document.getElementById('f_profession').value;
+  const phone = document.getElementById('f_phone').value.trim();
+  const baseSalary = document.getElementById('f_salary').value;
+  const hireDate = document.getElementById('f_hire').value;
+  if(!name){ alert('الرجاء إدخال اسم الموظف'); return; }
+  const payload = {name, profession, phone, baseSalary: Number(baseSalary)||0, hireDate};
+  try{
+    if(editingEmployee){
+      await apiUpdateEmployee(editingEmployee.id, payload);
+    } else {
+      await apiCreateEmployee(payload);
+    }
+    closeModal();
+    await loadData();
+    render();
+  }catch(e){
+    alert('تعذر حفظ بيانات الموظف. تحقق من اتصالك بالإنترنت وحاول مجددًا.');
+  }
+}
+async function deleteEmployee(id){
+  if(!confirm('هل تريد حذف هذا الموظف؟ سيتم حذف كل بيانات حضوره أيضًا.')) return;
+  try{
+    await apiDeleteEmployee(id);
+    await loadData();
+    render();
+  }catch(e){
+    alert('تعذر حذف الموظف. تحقق من اتصالك بالإنترنت.');
+  }
+}
+
+/* ---------- الحضور والغياب ---------- */
+function renderAttendance(){
+  if(state.employees.length===0){
+    return emptyState('لا يوجد موظفون بعد','أضف موظفين أولاً من صفحة "الموظفون"');
+  }
+  const rows = state.employees.map(e=>{
+    const key = e.id+'|'+selectedAttDate;
+    const st = state.attendance[key];
+    return `
+    <div class="card p-4 flex items-center justify-between gap-4 flex-wrap">
+      <div class="flex items-center gap-3 min-w-[180px]">
+        <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white" style="background:var(--steel)">${esc(e.name[0]||'?')}</div>
+        <div>
+          <div class="font-semibold text-sm">${esc(e.name)}</div>
+          <div class="text-xs" style="color:var(--muted)">${esc(e.profession)}</div>
+        </div>
+      </div>
+      <div class="flex gap-2 flex-1 min-w-[220px] max-w-xs">
+        <button class="att-btn ${st==='present'?'sel-present':'unsel'}" onclick="markAttendance('${e.id}','present')">حاضر</button>
+        <button class="att-btn ${st==='absent'?'sel-absent':'unsel'}" onclick="markAttendance('${e.id}','absent')">غائب</button>
+        <button class="att-btn ${st==='leave'?'sel-leave':'unsel'}" onclick="markAttendance('${e.id}','leave')">إجازة</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="flex items-center gap-3 mb-5 flex-wrap">
+    <label class="!mb-0">التاريخ:</label>
+    <input type="date" value="${selectedAttDate}" onchange="changeAttDate(this.value)" class="!w-auto">
+  </div>
+  <div class="flex flex-col gap-3">${rows}</div>`;
+}
+function changeAttDate(val){ selectedAttDate = val; render(); }
+async function markAttendance(empId, status){
+  const key = empId+'|'+selectedAttDate;
+  const newStatus = (state.attendance[key]===status) ? null : status;
+  if(newStatus) state.attendance[key] = newStatus; else delete state.attendance[key];
+  render();
+  try{
+    await apiSetAttendance(empId, selectedAttDate, newStatus);
+  }catch(e){
+    alert('تعذر حفظ الحضور. تحقق من اتصالك بالإنترنت.');
+    await loadData();
+    render();
+  }
+}
+
+/* ---------- الأجور ---------- */
+function daysInMonth(ym){ const [y,m]=ym.split('-').map(Number); return new Date(y,m,0).getDate(); }
+
+function renderSalaries(){
+  if(state.employees.length===0){
+    return emptyState('لا يوجد موظفون بعد','أضف موظفين أولاً لحساب أجورهم');
+  }
+  const [y,m] = selectedSalaryMonth.split('-');
+  const dim = daysInMonth(selectedSalaryMonth);
+
+  const rows = state.employees.map(e=>{
+    let absentDays=0, presentDays=0, leaveDays=0;
+    for(let d=1; d<=dim; d++){
+      const date = `${y}-${m}-${String(d).padStart(2,'0')}`;
+      const st = state.attendance[e.id+'|'+date];
+      if(st==='absent') absentDays++;
+      else if(st==='present') presentDays++;
+      else if(st==='leave') leaveDays++;
+    }
+    const base = Number(e.baseSalary||0);
+    const dailyRate = base/30;
+    const deduction = dailyRate*absentDays;
+    const net = Math.max(0, base-deduction);
+    return `
+    <tr>
+      <td class="font-semibold">${esc(e.name)}</td>
+      <td>${esc(e.profession)}</td>
+      <td>${base.toLocaleString('ar-DZ')} دج</td>
+      <td><span class="badge badge-ok">${presentDays}</span></td>
+      <td><span class="badge badge-danger">${absentDays}</span></td>
+      <td><span class="badge badge-leave">${leaveDays}</span></td>
+      <td style="color:var(--danger)">-${Math.round(deduction).toLocaleString('ar-DZ')} دج</td>
+      <td class="font-bold" style="color:var(--ok)">${Math.round(net).toLocaleString('ar-DZ')} دج</td>
+    </tr>`;
+  }).join('');
+
+  const totalNet = state.employees.reduce((sum,e)=>{
+    let absentDays=0;
+    for(let d=1; d<=dim; d++){
+      const date = `${y}-${m}-${String(d).padStart(2,'0')}`;
+      if(state.attendance[e.id+'|'+date]==='absent') absentDays++;
+    }
+    const base=Number(e.baseSalary||0);
+    return sum + Math.max(0, base-(base/30)*absentDays);
+  },0);
+
+  return `
+  <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+    <div class="flex items-center gap-3">
+      <label class="!mb-0">الشهر:</label>
+      <input type="month" value="${selectedSalaryMonth}" onchange="changeSalaryMonth(this.value)" class="!w-auto">
+    </div>
+    <div class="card px-5 py-2.5">
+      <span class="text-xs" style="color:var(--muted)">إجمالي صافي الأجور: </span>
+      <span class="font-display font-black" style="color:var(--navy)">${Math.round(totalNet).toLocaleString('ar-DZ')} دج</span>
+    </div>
+  </div>
+  <div class="card overflow-hidden">
+    <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th>الموظف</th><th>المهنة</th><th>الأجر الأساسي</th><th>أيام الحضور</th><th>أيام الغياب</th><th>أيام الإجازة</th><th>الخصم</th><th>الصافي</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    </div>
+  </div>
+  <p class="text-xs mt-3" style="color:var(--muted)">* يُحتسب الخصم على أساس الأجر اليومي = الأجر الأساسي ÷ 30 لكل يوم غياب.</p>`;
+}
+function changeSalaryMonth(val){ selectedSalaryMonth = val; render(); }
+
+/* ===================== أدوات مساعدة ===================== */
+function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function formatDateAr(iso){
+  if(!iso) return '—';
+  const d = new Date(iso+'T00:00:00');
+  return d.toLocaleDateString('ar-DZ', {year:'numeric', month:'long', day:'numeric'});
+}
+
+/* ===================== تشغيل ===================== */
+(async function init(){
+  renderNav();
+  render();
+  await loadData();
+  render();
+  setInterval(loadData, 30000); // مزامنة دورية كل 30 ثانية مع الخادم
+})();
+</script>
+</body>
+</html>
